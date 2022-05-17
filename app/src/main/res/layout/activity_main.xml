@@ -10,7 +10,7 @@
         android:id="@+id/wave_progress_view"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        app:font_size="10sp"
+        app:font_size="14sp"
         app:font_color="@color/black"
         app:stroke_color="@color/purple_200"
         app:wave_color="@color/purple_200"

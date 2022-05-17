@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
@@ -24,6 +25,8 @@ public class WaveProgressView extends View {
     private final Context mContext;
     //文字画笔
     private Paint mTextPaint;
+    //文字画笔（白色）
+    private Paint mTextWhitePaint;
     //圆圈画笔
     private Paint mCirclePaint;
     //波浪画笔
@@ -128,6 +131,12 @@ public class WaveProgressView extends View {
         mTextPaint.setTextSize(textSize);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
 
+        mTextWhitePaint = new Paint();
+        mTextWhitePaint.setAntiAlias(true);
+        mTextWhitePaint.setColor(Color.WHITE);
+        mTextWhitePaint.setTextSize(textSize);
+        mTextWhitePaint.setTextAlign(Paint.Align.CENTER);
+
         mCirclePaint = new Paint();
         mCirclePaint.setAntiAlias(true);
         mCirclePaint.setColor(circleColor);
@@ -144,12 +153,15 @@ public class WaveProgressView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         clipCircle(canvas);
-        //绘制波浪
-        drawWave(canvas);
-        //绘制圆圈
-        drawCircleBorder(canvas);
         //绘制文字
         drawProgressText(canvas);
+        //绘制波浪
+        drawWave(canvas);
+        //绘制文字(白色)
+        drawProgressWhiteText(canvas);
+        //绘制圆圈
+        drawCircleBorder(canvas);
+
     }
 
     /**
@@ -169,6 +181,8 @@ public class WaveProgressView extends View {
      * @param canvas canvas
      */
     private void drawCircleBorder(Canvas canvas) {
+        //恢复裁剪前的canvas
+        canvas.restore();
         canvas.drawCircle(mWidth / 2, mHeight / 2, mWidth / 2, mCirclePaint);
     }
 
@@ -179,6 +193,15 @@ public class WaveProgressView extends View {
      */
     private void drawProgressText(Canvas canvas) {
         canvas.drawText(progress + "%", mWidth / 2, mHeight / 2, mTextPaint);
+    }
+
+    /**
+     * 绘制进度文字(白色)
+     *
+     * @param canvas
+     */
+    private void drawProgressWhiteText(Canvas canvas) {
+        canvas.drawText(progress + "%", mWidth / 2, mHeight / 2, mTextWhitePaint);
     }
 
     /**
@@ -207,6 +230,10 @@ public class WaveProgressView extends View {
         path.close();
 
         canvas.drawPath(path, mWavePaint);
+
+        //裁剪canvas， 用于画颜色不规则的文字（位于海浪中的文字显示白色），裁剪之前先保存，因为后面还要话圆形轮廓
+        canvas.save();
+        canvas.clipPath(path);
 
     }
 
@@ -241,6 +268,7 @@ public class WaveProgressView extends View {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        //销毁动画
         if(waveValueAnimator != null) {
             waveValueAnimator.removeAllListeners();
             waveValueAnimator.cancel();
